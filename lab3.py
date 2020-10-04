@@ -4,7 +4,6 @@ import pandas as pd
 
 # Define DBOperation class to manage all data into the database.
 # Give a name of your choice to the database
-
 class DBOperations:
     sql_create_table_firsttime = "CREATE TABLE IF NOT EXISTS employee (" \
                                  "employee_id INTEGER PRIMARY KEY AUTOINCREMENT," \
@@ -33,7 +32,7 @@ class DBOperations:
     sql_search = "SELECT * " \
                  "FROM employee " \
                  "WHERE employee_id = ?;"
-    sql_update_data = "UPDATE employee SET Forename=?, Surname=?, EmailAddress=?, Salary=? WHERE employee_id=?"
+    sql_update_data = "UPDATE employee SET Title=?, Forename=?, Surname=?, EmailAddress=?, Salary=? WHERE employee_id=?"
     sql_delete_data = "DELETE FROM employee WHERE employee_id=?"
     sql_drop_table = "DROP TABLE employee"
 
@@ -91,8 +90,6 @@ class DBOperations:
 
             self.cur.execute(self.sql_insert, tuple(str(emp).split("\n")))
             self.conn.commit()
-            last_row_id = self.cur.lastrowid
-            print(last_row_id)
             print("Inserted data successfully")
         except Exception as e:
             print(e)
@@ -146,12 +143,16 @@ class DBOperations:
             self.get_connection()
             # Update statement
             employee_id = int(input("Enter Employee ID: "))
-            forename = str(input("Enter Employee Forename: "))
-            surname = str(input("Enter Employee Forename: "))
-            email_address = str(input("Enter Employee Forename: "))
-            salary = str(input("Enter Employee Forename: "))
-            result = self.cur.execute(self.sql_update_data, ((str(forename)), (str(surname)), (str(email_address)), (float(salary), (str(employee_id)))))
+            emp_title = str(input("Enter Employee's New Title: "))
+            forename = str(input("Enter Employee's New Forename: "))
+            surname = str(input("Enter Employee's New Surname: "))
+            email_address = str(input("Enter Employee's New Email Address: "))
+            salary = str(input("Enter Employee's New Salary: "))
+            result = self.cur.execute(self.sql_update_data,
+                                      [(str(emp_title)), (str(forename)), (str(surname)), (str(email_address)),
+                                       (float(salary)), (str(employee_id)), ])
             if result.rowcount != 0:
+                self.conn.commit()
                 print(str(result.rowcount) + "Row(s) affected.")
             else:
                 print("Cannot find this record in the database")
@@ -167,7 +168,7 @@ class DBOperations:
         try:
             self.get_connection()
             employee_id = int(input("Enter Employee ID: "))
-            result = self.cur.execute(self.sql_delete_data, tuple(str(employee_id)))
+            result = self.cur.execute(self.sql_delete_data, [str(employee_id, )])
             if result.rowcount != 0:
                 self.conn.commit()
                 print(str(result.rowcount) + "Row(s) affected.")
@@ -226,7 +227,6 @@ class Employee:
         return self.salary
 
     def __str__(self):
-        # str(self.employee_id) + "\n" +
         return self.empTitle + "\n" + self.forename + "\n" + self.surname + "\n" + self.email + "\n" + str(self.salary)
 
 
@@ -236,7 +236,7 @@ class Employee:
 
 while True:
     print("\n Menu:")
-    print("**********")
+    print("****************************************")
     print(" 1. Create table EmployeeUoB")
     print(" 2. Insert data into EmployeeUoB")
     print(" 3. Select all data into EmployeeUoB")
